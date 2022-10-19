@@ -5,12 +5,12 @@ import requests
 
 from tmdbv3api import Movie, TMDb
 tmdb = TMDb()
-tmdb.api_key = '8f40cf8ae79cf86ede5df70c31cc1029'
+tmdb.api_key = 'API here'
 tmdb_movie = Movie()
 
 def fetch_poster(movie_id):
     if movie_id != None:
-        url = "https://api.themoviedb.org/3/movie/{}?api_key=8f40cf8ae79cf86ede5df70c31cc1029&language=en-US".format(movie_id)
+        url = "https://api.themoviedb.org/3/movie/{}?api_key=API HERE&language=en-US".format(movie_id)
         data = requests.get(url)
         data = data.json()
         poster_path = data['poster_path']
