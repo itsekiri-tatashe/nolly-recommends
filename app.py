@@ -1,31 +1,54 @@
+# Importing necesary libraries
 import streamlit as st
 import pandas as pd
 import joblib
 import requests
 
+# importing TMBD lib to fetch images of movies
 from tmdbv3api import Movie, TMDb
+
+# setting up tmdb api and library
 tmdb = TMDb()
-tmdb.api_key = 'API here'
+tmdb.api_key = 'API KEY HERE'
 tmdb_movie = Movie()
 
+# function to get movie poster based on movie id
 def fetch_poster(movie_id):
+    # if movie id is available
     if movie_id != None:
-        url = "https://api.themoviedb.org/3/movie/{}?api_key=API HERE&language=en-US".format(movie_id)
+        # get url of movie
+        url = "https://api.themoviedb.org/3/movie/{}?api_key=API KEY HERE&language=en-US".format(movie_id)
+        
+        # fetch its data
         data = requests.get(url)
         data = data.json()
+        # get path of movie poster image
         poster_path = data['poster_path']
-        full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
+
+        # if available concatenate with link else fetch dummy link
+        try:
+            full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
+        except:
+            full_path = "https://guardian.ng/wp-content/uploads/2019/09/Nollywood-Rockcity-FM-e1569221315847.jpg"    
+    
+    # if movie does not have id set dummy link
     else:
         full_path = "https://guardian.ng/wp-content/uploads/2019/09/Nollywood-Rockcity-FM-e1569221315847.jpg"
     return full_path
 
+
 def recommend(title):
+    # get index of movie
     index = movies.loc[movies["Title"] == title].index[0]
+
+    # get index  of movies similair to user's movie
     similiar_movies = list(enumerate(similarity[index]))
     similiar_movies_index = sorted(similiar_movies, key=lambda x:x[1], reverse=True)
+    
+    # Get top 10 most similiar movies by index
     movies_index = similiar_movies_index[1:10]
 
-
+    # Extracting the movie names and searching for theur poster using their index
     movie = []
     poster = []
     for i in range(len(movies_index)):
@@ -40,16 +63,21 @@ def recommend(title):
         poster.append(fetch_poster(movie_id))
     return movie, poster
 
+# import similarity and dataset
 similarity = joblib.load("similarity_joblib")
 movies = pd.read_csv("movies.csv")
 
+# setting the header of the movie
 st.title("Naija Movie Recommender System")
 st.text("Recommmending you movies based on what you want")
+
+# creating a dropdown list showing options user can chose from
 options = st.selectbox(
     "Type or select a movie from the dropdown",
     movies["Title"].values
 )
 
+# Show Similar movies with their posters
 if st.button('Show Recommendation'):
     st.text("NOTICE: Some of the images may not relate with the movie title")
     recommended_movie_names,recommended_movie_posters = recommend(options)
